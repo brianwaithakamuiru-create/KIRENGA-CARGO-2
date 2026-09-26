@@ -1,69 +1,59 @@
 # KIRENGA CARGO 2
 
-Premium cargo & logistics platform — clean rebuild with full portals.
+Premium cargo & logistics platform — Vite + React + TypeScript + Firebase.
 
-## Features
+## Setup
 
-- **Public site**: Landing, Services, Fleet gallery, Booking, Tracking
-- **Admin Command Center**: Live stats, Bookings (confirm/cancel creates shipment), Shipments (advance lifecycle), Fleet gallery, Tracking
-- **Staff workplace**: Role-filtered modules
-- **Driver**: Assignments (accept → pickup → load → depart → transit → deliver), Delivery confirmation
-- **Customer**: Dashboard, My bookings (create), Shipments, Tracking
-- **Demo mode**: Works without Firebase (use demo logins below)
-- **Security**: Server-side role checks via Cloud Functions + Firestore rules
-- **CI**: GitHub Actions → Firebase Hosting
+1. Clone the repo
+2. Copy environment variables:
 
-## Demo accounts
+```bash
+cp .env.example .env
+```
 
-| Role     | Email                 | Password    |
-|----------|-----------------------|-------------|
-| Admin    | admin@kirenga.com     | admin123    |
-| Staff    | ops@kirenga.com       | ops123      |
-| Driver   | driver@kirenga.com    | driver123   |
-| Customer | customer@kirenga.com  | customer123 |
+3. Fill Firebase config in `.env` (from Firebase Console → Project settings):
 
-Public tracking demo: **KC-DEMO-2026**
+```
+VITE_FIREBASE_API_KEY=...
+VITE_FIREBASE_AUTH_DOMAIN=...
+VITE_FIREBASE_PROJECT_ID=...
+VITE_FIREBASE_STORAGE_BUCKET=...
+VITE_FIREBASE_MESSAGING_SENDER_ID=...
+VITE_FIREBASE_APP_ID=...
+```
 
-## Quick start
+4. Install and run:
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open http://localhost:5173
+## Production (Vercel)
 
-## Firebase (production)
+Add the same `VITE_FIREBASE_*` variables under **Project → Settings → Environment Variables**.
 
-```bash
-cp .env.example .env
-# Fill VITE_FIREBASE_* 
+## Firebase setup
 
-firebase login
-firebase use <project-id>
-firebase deploy --only firestore:rules,storage,functions
-npm run build
-firebase deploy --only hosting
+1. Create a Firebase project
+2. Enable **Authentication** → Email/Password
+3. Create **Firestore** database
+4. Deploy rules: `firebase deploy --only firestore:rules,storage`
+5. Create user accounts in Authentication, then add matching docs in `users/{uid}` with fields:
+
+```json
+{
+  "email": "user@example.com",
+  "displayName": "Name",
+  "role": "admin",
+  "status": "active",
+  "createdAt": "...",
+  "updatedAt": "..."
+}
 ```
 
-### GitHub Actions secrets
-
-Add to repo Settings → Secrets:
-
-- `FIREBASE_SERVICE_ACCOUNT` (JSON service account)
-- `FIREBASE_PROJECT_ID`
-- `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_STORAGE_BUCKET`, `VITE_FIREBASE_MESSAGING_SENDER_ID`, `VITE_FIREBASE_APP_ID`
-
-Push to `main` or `kirenga-2` to deploy.
-
-## Shipment lifecycle
-
-BOOKED → CONFIRMED → ASSIGNED → ACCEPTED → ARRIVED_AT_PICKUP → LOADING → LOADED → DEPARTED → IN_TRANSIT → CHECKPOINT → ARRIVED → DELIVERED
+Roles: `admin` | `operations` | `dispatch` | `logistics` | `finance` | `documentation` | `fleet` | `support` | `hr` | `driver` | `customer`
 
 ## Stack
 
 Vite · React 18 · TypeScript · Firebase · Lucide · DM Sans + Playfair Display
-
----
-
-KIRENGA CARGO 2 — security and UX from day one.
