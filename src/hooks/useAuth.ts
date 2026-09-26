@@ -10,57 +10,33 @@ interface AuthState {
 
 const SESSION_KEY = 'kirenga_session_user';
 
-/** Local accounts — no Firebase required for login */
-const LOCAL_USERS: Record<string, { password: string; user: User }> = {
-  'admin@kirenga.com': {
-    password: 'KirengaAdmin2026!',
-    user: {
-      uid: 'local-admin',
-      email: 'admin@kirenga.com',
-      displayName: 'Administrator',
-      role: 'admin',
-      status: 'active',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    },
-  },
-  'ops@kirenga.com': {
-    password: 'ops123',
-    user: {
-      uid: 'local-ops',
-      email: 'ops@kirenga.com',
-      displayName: 'Operations Staff',
-      role: 'operations',
-      status: 'active',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    },
-  },
-  'driver@kirenga.com': {
-    password: 'driver123',
-    user: {
-      uid: 'local-driver',
-      email: 'driver@kirenga.com',
-      displayName: 'Driver',
-      role: 'driver',
-      status: 'active',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    },
-  },
-  'customer@kirenga.com': {
-    password: 'customer123',
-    user: {
-      uid: 'local-customer',
-      email: 'customer@kirenga.com',
-      displayName: 'Customer',
-      role: 'customer',
-      status: 'active',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    },
-  },
-};
+function makeUser(
+  uid: string,
+  email: string,
+  displayName: string,
+  role: User['role']
+): User {
+  return {
+    uid,
+    email,
+    displayName,
+    role,
+    status: 'active',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+export const LOCAL_ACCOUNTS = [
+  { email: 'admin@kirenga.com', password: 'admin123', label: 'Admin', user: makeUser('local-admin', 'admin@kirenga.com', 'Administrator', 'admin') },
+  { email: 'ops@kirenga.com', password: 'ops123', label: 'Staff', user: makeUser('local-ops', 'ops@kirenga.com', 'Operations', 'operations') },
+  { email: 'driver@kirenga.com', password: 'driver123', label: 'Driver', user: makeUser('local-driver', 'driver@kirenga.com', 'Driver', 'driver') },
+  { email: 'customer@kirenga.com', password: 'customer123', label: 'Customer', user: makeUser('local-customer', 'customer@kirenga.com', 'Customer', 'customer') },
+] as const;
+
+const LOCAL_USERS: Record<string, { password: string; user: User }> = Object.fromEntries(
+  LOCAL_ACCOUNTS.map((a) => [a.email, { password: a.password, user: a.user }])
+);
 
 export function useAuth() {
   const [state, setState] = useState<AuthState>({
@@ -74,8 +50,7 @@ export function useAuth() {
     try {
       const saved = localStorage.getItem(SESSION_KEY);
       if (saved) {
-        const user = JSON.parse(saved) as User;
-        setState({ user, firebaseUser: null, loading: false, error: null });
+        setState({ user: JSON.parse(saved) as User, firebaseUser: null, loading: false, error: null });
         return;
       }
     } catch {
@@ -86,25 +61,13 @@ export function useAuth() {
 
   const login = useCallback(async (email: string, password: string) => {
     setState((s) => ({ ...s, loading: true, error: null }));
-    const key = email.toLowerCase().trim();
-    const entry = LOCAL_USERS[key];
-
+    const entry = LOCAL_USERS[email.toLowerCase().trim()];
     if (entry && entry.password === password) {
       localStorage.setItem(SESSION_KEY, JSON.stringify(entry.user));
-      setState({
-        user: entry.user,
-        firebaseUser: null,
-        loading: false,
-        error: null,
-      });
+      setState({ user: entry.user, firebaseUser: null, loading: false, error: null });
       return;
     }
-
-    setState((s) => ({
-      ...s,
-      loading: false,
-      error: 'Invalid email or password.',
-    }));
+    setState((s) => ({ ...s, loading: false, error: 'Invalid email or password.' }));
     throw new Error('Invalid credentials');
   }, []);
 

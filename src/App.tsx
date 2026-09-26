@@ -8,7 +8,6 @@ import { EmptyState } from './components/EmptyState';
 
 import Home from './pages/Home';
 import Login from './pages/Auth/Login';
-import Setup from './pages/Auth/Setup';
 import Booking from './pages/Booking';
 import Tracking from './pages/Tracking';
 import About from './pages/About';
@@ -16,56 +15,20 @@ import Services from './pages/Services';
 import Fleet from './pages/Fleet';
 import Contact from './pages/Contact';
 
-function AdminShell({ title }: { title: string }) {
+function Shell({
+  variant,
+  title,
+}: {
+  variant: 'admin' | 'staff' | 'driver' | 'customer';
+  title: string;
+}) {
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
-      <Navigation variant="admin" />
+      <Navigation variant={variant} />
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         <TopBar title={title} />
         <main style={{ flex: 1, padding: '1.5rem' }}>
-          <EmptyState title={title} description="Module connected to Firebase operations." />
-        </main>
-      </div>
-    </div>
-  );
-}
-
-function StaffShell({ title }: { title: string }) {
-  return (
-    <div style={{ display: 'flex', minHeight: '100vh' }}>
-      <Navigation variant="staff" />
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <TopBar title={title} />
-        <main style={{ flex: 1, padding: '1.5rem' }}>
-          <EmptyState title={title} description="Staff workplace module." />
-        </main>
-      </div>
-    </div>
-  );
-}
-
-function DriverShell({ title }: { title: string }) {
-  return (
-    <div style={{ display: 'flex', minHeight: '100vh' }}>
-      <Navigation variant="driver" />
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <TopBar title={title} />
-        <main style={{ flex: 1, padding: '1.5rem' }}>
-          <EmptyState title={title} description="Driver workplace module." />
-        </main>
-      </div>
-    </div>
-  );
-}
-
-function CustomerShell({ title }: { title: string }) {
-  return (
-    <div style={{ display: 'flex', minHeight: '100vh' }}>
-      <Navigation variant="customer" />
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <TopBar title={title} />
-        <main style={{ flex: 1, padding: '1.5rem' }}>
-          <EmptyState title={title} description="Customer portal module." />
+          <EmptyState title={title} description={`Welcome to the ${variant} portal.`} />
         </main>
       </div>
     </div>
@@ -74,7 +37,7 @@ function CustomerShell({ title }: { title: string }) {
 
 function AppRoutes() {
   const { loading } = useAuth();
-  if (loading) return <LoadingScreen message="Initializing KIRENGA CARGO…" />;
+  if (loading) return <LoadingScreen message="Loading…" />;
 
   return (
     <Routes>
@@ -86,17 +49,16 @@ function AppRoutes() {
       <Route path="/fleet" element={<Fleet />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/login" element={<Login />} />
-      <Route path="/setup" element={<Setup />} />
       <Route path="/forgot-password" element={<Login />} />
 
-      <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminShell title="Command Center" /></ProtectedRoute>} />
-      <Route path="/admin/*" element={<ProtectedRoute allowedRoles={['admin']}><AdminShell title="Admin" /></ProtectedRoute>} />
-      <Route path="/staff" element={<ProtectedRoute allowedRoles={['operations','dispatch','logistics','finance','documentation','fleet','support','hr']}><StaffShell title="Workplace" /></ProtectedRoute>} />
-      <Route path="/staff/*" element={<ProtectedRoute allowedRoles={['operations','dispatch','logistics','finance','documentation','fleet','support','hr']}><StaffShell title="Staff" /></ProtectedRoute>} />
-      <Route path="/driver" element={<ProtectedRoute allowedRoles={['driver']}><DriverShell title="Workplace" /></ProtectedRoute>} />
-      <Route path="/driver/*" element={<ProtectedRoute allowedRoles={['driver']}><DriverShell title="Driver" /></ProtectedRoute>} />
-      <Route path="/customer" element={<ProtectedRoute allowedRoles={['customer']}><CustomerShell title="Dashboard" /></ProtectedRoute>} />
-      <Route path="/customer/*" element={<ProtectedRoute allowedRoles={['customer']}><CustomerShell title="Customer" /></ProtectedRoute>} />
+      <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin']}><Shell variant="admin" title="Command Center" /></ProtectedRoute>} />
+      <Route path="/admin/*" element={<ProtectedRoute allowedRoles={['admin']}><Shell variant="admin" title="Admin" /></ProtectedRoute>} />
+      <Route path="/staff" element={<ProtectedRoute allowedRoles={['operations','dispatch','logistics','finance','documentation','fleet','support','hr']}><Shell variant="staff" title="Workplace" /></ProtectedRoute>} />
+      <Route path="/staff/*" element={<ProtectedRoute allowedRoles={['operations','dispatch','logistics','finance','documentation','fleet','support','hr']}><Shell variant="staff" title="Staff" /></ProtectedRoute>} />
+      <Route path="/driver" element={<ProtectedRoute allowedRoles={['driver']}><Shell variant="driver" title="Workplace" /></ProtectedRoute>} />
+      <Route path="/driver/*" element={<ProtectedRoute allowedRoles={['driver']}><Shell variant="driver" title="Driver" /></ProtectedRoute>} />
+      <Route path="/customer" element={<ProtectedRoute allowedRoles={['customer']}><Shell variant="customer" title="Dashboard" /></ProtectedRoute>} />
+      <Route path="/customer/*" element={<ProtectedRoute allowedRoles={['customer']}><Shell variant="customer" title="Customer" /></ProtectedRoute>} />
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
