@@ -8,6 +8,7 @@ import { EmptyState } from './components/EmptyState';
 
 import Home from './pages/Home';
 import Login from './pages/Auth/Login';
+import Setup from './pages/Auth/Setup';
 import Booking from './pages/Booking';
 import Tracking from './pages/Tracking';
 import About from './pages/About';
@@ -85,6 +86,7 @@ function AppRoutes() {
       <Route path="/fleet" element={<Fleet />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/setup" element={<Setup />} />
       <Route path="/forgot-password" element={<Login />} />
 
       <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminShell title="Command Center" /></ProtectedRoute>} />
