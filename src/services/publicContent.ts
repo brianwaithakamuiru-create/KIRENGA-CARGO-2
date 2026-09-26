@@ -1,4 +1,4 @@
-import { db } from '../lib/firebase';
+import { db, isFirebaseConfigured } from '../lib/firebase';
 
 export interface Destination {
   id: string;
@@ -60,14 +60,15 @@ const DEFAULT_SERVICES: PublicService[] = [
   { id: 'ltl', title: 'Less Than Truckload (LTL)', description: 'Cost-efficient shared capacity for smaller consignments on established routes.', order: 4, active: true },
   { id: 'container', title: 'Container Transportation', description: 'Container haulage and intermodal support for port and inland destinations.', order: 5, active: true },
   { id: 'specialized', title: 'Specialized Cargo', description: 'Handling for sensitive, high-value, or non-standard cargo with care protocols.', order: 6, active: true },
-  { id: 'fleet-mgmt', title: 'Route & Fleet Management', description: 'Planned routing, vehicle assignment, and operational oversight on every trip.', order: 7, active: true },
-  { id: 'tracking', title: 'Shipment Tracking', description: 'Visibility from booking confirmation through delivery confirmation.', order: 8, active: true },
+  { id: 'route-fleet', title: 'Route & Fleet Management', description: 'Planned corridors, vehicle assignment and operational control from one system.', order: 7, active: true },
+  { id: 'tracking', title: 'Shipment Tracking', description: 'Status visibility for customers and internal teams across the shipment lifecycle.', order: 8, active: true },
 ];
 
 export async function getDestinations(): Promise<Destination[]> {
+  if (!isFirebaseConfigured || !db) return DEFAULT_DESTINATIONS;
   try {
-    const { collection, getDocs, query, where, orderBy } = await import('firebase/firestore');
-    const snap = await getDocs(query(collection(db, 'destinations'), where('active', '==', true), orderBy('order', 'asc')));
+    const { collection, getDocs, query, orderBy } = await import('firebase/firestore');
+    const snap = await getDocs(query(collection(db, 'destinations'), orderBy('order', 'asc')));
     if (snap.empty) return DEFAULT_DESTINATIONS;
     return snap.docs.map((d) => ({ id: d.id, ...d.data() } as Destination));
   } catch {
@@ -76,6 +77,7 @@ export async function getDestinations(): Promise<Destination[]> {
 }
 
 export async function getContactSettings(): Promise<ContactSettings | null> {
+  if (!isFirebaseConfigured || !db) return null;
   try {
     const { doc, getDoc } = await import('firebase/firestore');
     const snap = await getDoc(doc(db, 'settings', 'contact'));
@@ -87,9 +89,10 @@ export async function getContactSettings(): Promise<ContactSettings | null> {
 }
 
 export async function getPublicServices(): Promise<PublicService[]> {
+  if (!isFirebaseConfigured || !db) return DEFAULT_SERVICES;
   try {
-    const { collection, getDocs, query, where, orderBy } = await import('firebase/firestore');
-    const snap = await getDocs(query(collection(db, 'services'), where('active', '==', true), orderBy('order', 'asc')));
+    const { collection, getDocs, query, orderBy } = await import('firebase/firestore');
+    const snap = await getDocs(query(collection(db, 'services'), orderBy('order', 'asc')));
     if (snap.empty) return DEFAULT_SERVICES;
     return snap.docs.map((d) => ({ id: d.id, ...d.data() } as PublicService));
   } catch {
@@ -98,6 +101,7 @@ export async function getPublicServices(): Promise<PublicService[]> {
 }
 
 export async function getPublishedRoutes(): Promise<PublicRoute[]> {
+  if (!isFirebaseConfigured || !db) return [];
   try {
     const { collection, getDocs, query, where } = await import('firebase/firestore');
     const snap = await getDocs(query(collection(db, 'routes'), where('published', '==', true)));
@@ -107,15 +111,11 @@ export async function getPublishedRoutes(): Promise<PublicRoute[]> {
   }
 }
 
-export async function getPublishedFleet() {
+export async function getPublishedFleet(): Promise<Array<Record<string, unknown>>> {
+  if (!isFirebaseConfigured || !db) return [];
   try {
     const { collection, getDocs, query, where } = await import('firebase/firestore');
-    let snap;
-    try {
-      snap = await getDocs(query(collection(db, 'vehicles'), where('published', '==', true)));
-    } catch {
-      snap = await getDocs(collection(db, 'vehicles'));
-    }
+    const snap = await getDocs(query(collection(db, 'vehicles'), where('published', '==', true)));
     return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
   } catch {
     return [];
