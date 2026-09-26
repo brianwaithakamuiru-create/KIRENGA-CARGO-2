@@ -34,7 +34,7 @@ export default function Login() {
     try {
       await login(email, password);
     } catch {
-      setError('Invalid email or password. Please try again.');
+      setError('Invalid email or password.');
     } finally {
       setSubmitting(false);
     }
@@ -66,9 +66,7 @@ export default function Login() {
           >
             {APP_NAME}
           </div>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.9375rem' }}>
-            Sign in to your account
-          </p>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.9375rem' }}>Sign in to your account</p>
         </div>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -113,12 +111,6 @@ export default function Login() {
               required
               autoComplete="current-password"
             />
-          </div>
-
-          <div style={{ textAlign: 'right' }}>
-            <Link to="/forgot-password" style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
-              Forgot password?
-            </Link>
           </div>
 
           <button type="submit" className="btn btn-primary" disabled={submitting} style={{ width: '100%', padding: '0.875rem' }}>
